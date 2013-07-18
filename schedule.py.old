@@ -1,0 +1,283 @@
+from django.db import models
+from plan.models import *
+from plan.forms import *
+import sys
+import itertools
+
+
+# NOTES
+# --------------------------------------------------------------------------------
+# This script should build a list of all possible schedules in a fairly effecient
+# way and meet the same requirements as the ASP code. It takes three parameters:
+#
+# s    student id
+# max  max hours
+# min  min hours
+#
+#
+def course_repeated(offerset):
+    courses = []
+    for o in offerset:
+        if o.course in courses:
+            return True
+        else:
+            courses.append(o.course)
+    return False
+
+
+def ineligible(offerset):
+    creqs = []
+    for o in offerset:
+        for r in o.course.corequisites.all():
+            if r not in creqs:
+                creqs.append(r)
+    for r in creqs:
+        if r not in offerset:
+            return True
+    return False    
+
+
+def taken(offerset,s):
+    for o in offerset:
+        if s.taken.filter(id=o.course.id).count() > 0:
+            return True
+    return False
+
+
+def conflict(offerset):
+    subs = list(itertools.combinations(offerset,2))
+    for s in subs:
+        a = s[0]
+        b = s[1]
+        if a == b:
+            return True
+        if a.period == b.period:
+            return True
+        if (a.period.day.all() & b.period.day.all()).count() > 0:
+            if a.period.starts == b.period.starts and a.period.ends == b.period.ends:
+                return True
+            if a.period.starts < b.period.starts:
+                if a.period.ends < b.period.starts:
+                    continue
+            elif b.period.starts < a.period.starts:
+                if b.period.ends < a.period.starts:
+                    continue
+            return True
+    
+    return False
+
+# --------------------------------------------------------------------------------
+# ENTRY POINT
+# --------------------------------------------------------------------------------
+
+s = None
+hmin = None
+hmax = None
+
+
+# parse command line args
+for i in sys.argv:
+    if i == "test_shell.py" or i == "schedule":
+        continue
+    else:
+        key = i.split('=')[0]
+        if key == 's':
+            s = i.split('=')[1]
+        elif key == 'min':
+            hmin = int(i.split('=')[1])
+        elif key == 'max':
+            hmax = int(i.split('=')[1])
+
+if s == None or hmin == None or hmax == None:
+    print "usage: schedule s=<id> min=<min> max=<max>"
+
+# get selected student
+student = Student.objects.get(id=s)
+# print "%s selected, for %d to %d." % (student,hmin,hmax)
+
+courses = []
+offerings = None
+
+# =============
+# = ATTEMPT 3 =
+# =============
+# goals: optimize for DB using caching
+# get offerings for courses which are explicitly required
+# 
+# student.degree_plan.required_courses
+# student.degree_plan.required_attrs.met_by
+
+# explicitly required and not taken
+required = student.degree_plan.required_courses.exclude(id__in=student.taken.values_list('id',flat=True)).distinct()
+
+# meets attributes
+meets = Course.objects.filter(meets__id__in=student.degree_plan.required_attrs.all().values_list('attribute__id',flat=True)).distinct()
+
+# either meets attributes or is required and not taken
+possible = (required | meets).distinct()
+
+# check prerequisites
+for c in possible:
+    if c.prerequisites.count() > 0 and c.prerequisites.exclude(id__in=student.taken.values_list('id',flat=True)).count() > 0:
+        possible = possible.exclude(id=c.id)
+
+
+# get all offerings for this group
+offerings = Offering.objects.filter(course__in=possible)
+
+# in order to make our guess computable, we'll enter an avg number of hours
+# slightly higher than the actual average 
+avg_hours = 2
+num_classes = hmax/avg_hours
+
+# generate all subsets of offerings
+# print "generating subsets..."
+from itertools import combinations
+subsets = [list(j) for i in range(num_classes+1) for j in combinations(offerings, i)
+    if hmin <= sum(o.course.hours for o in j) <= hmax]
+
+valid_sets = []
+
+count = 0
+
+print_iter = 500
+
+for s in subsets:
+    # if (count % print_iter == 0 and count > 0) or count == len(subsets) - 1:
+    #     print "%10d/%-10d %f%%" % (count,len(subsets),float(count) / float(len(subsets)) * 100.0)
+    if not course_repeated(s) and not conflict(s) and not ineligible(s) and not taken(s,student):
+        valid_sets.append(s)
+    
+    count += 1
+
+# print '\n\nLen: ', len(valid_sets)
+# unfound = 0
+# valid_copy = list(valid_sets)
+
+# for s in Schedule.objects.all():
+#     l = s.offer_list()
+#     if l not in valid_sets:
+#         unfound += 1
+#         print "%-6d missing - %s" % (unfound, l)
+#     else:
+#         valid_copy.remove(l)
+
+# print "%d sets were here and not there." % len(valid_copy)
+# for b in valid_copy:
+#     print b,
+#     raw_input()
+    
+    
+    
+# =============
+# = ATTEMPT 2 =
+# =============
+# # required and not taken courses
+# cs = student.degree_plan.required_courses.exclude(id__in=student.taken.all().values('id')).distinct()
+# 
+# # meets attrs
+# attrs = Attribute.objects.filter(id__in=student.degree_plan.required_attrs.all().values('attribute'))
+# ca = Course.objects.filter(meets__id__in=attrs.values('id')).distinct()
+# courses = (ca | cs).distinct().exclude(id__in=student.taken.all().values('id')).distinct()
+# 
+# for c in courses.all():
+#     if len(c.prerequisites.exclude(id__in=student.taken.all().values('id')).distinct()) > 0:
+#         courses = courses.exclude(id=c.id)
+# 
+# # build offering set
+# offerings = []
+# 
+# for c in courses.all():
+#     offerings.extend(c.offering_set.all().values_list('id',flat=True))
+#     
+# offers = Offering.objects.filter(id__in=offerings).distinct()
+# 
+# # find 'guaranteed' (i.e. no conflicts)
+# pds = Period.objects.filter(offering__in=offers)
+
+
+
+# =============
+# = ATTEMPT 1 =
+# =============
+# # exclude those with the same period
+# for p in pds.all():
+#     if (p.offering_set.all().distinct() & offers).count() > 1 and p not in rexclude:
+#         pds = pds.exclude(id=p.id)
+
+
+
+# # courses which are required
+# for c in student.degree_plan.required_courses.all():
+#     if c not in student.taken.all() and c not in courses:
+#         courses.append(c)
+
+
+# print "%d courses required." % len(courses)
+
+# # courses which meet attrs
+# for a in student.degree_plan.required_attrs.all():
+#     ca = a.attribute.course_set.all()
+#     for c in ca:
+#         if c not in courses:
+#             courses.append(c)
+
+# print "%d courses meet attrs or are required." % len(courses)
+
+# # get all offerings
+# offerings = Offering.objects.filter(course__in=courses)
+
+# print "%d available offerings." % offerings.count()
+
+# NOTE: might be a lot faster to select those "guaranteed"
+# first (i.e. no conflicts at all) using queryset filters
+# and then generate the rest, skipping those we already have
+
+# scheds = []
+
+# generate schedule by length, assuming
+# min = 1 and max = max_hrs / avg_num_hrs to save time
+# avg_num_hrs = 3
+
+
+
+# OLD METHOD
+#
+# print "Checking for schedules up to %d courses." % (max/avg_num_hrs)
+
+# for i in range(1,(max/avg_num_hrs)+1):
+#     print "Calculating: %d \t %d" % (i,len(scheds))
+
+#     # generate all possible combinations of length i
+#     allo = itertools.combinations(offerings,i)
+
+#     # check each combination
+#     count = 0
+#     for o in allo:
+#         count += 1
+#         if count % 100 == 0:
+#             print "\t %d" % count
+        
+#         sch = []
+#         problem = False
+
+#         if not valid_hours(o,min,max):
+#             problem = True
+        
+#         if i > 1 and not problem:    
+#             # check all possible combinations of two 
+#             # courses
+#             comp = itertools.combinations(o,2)
+#             for (a,b) in comp:
+#                 if conflict(a,b) or ineligible(student,a.course) or ineligible(student,b.course):
+#                     problem = True
+#         else:
+#             if ineligible(student,o[0].course):
+#                 problem = True
+#         # if any two given courses conflict, this
+#         # combination doesn't work
+#         if not problem:
+#             sch.extend(o)
+#             scheds.append(sch)
+
+# print "%d schedules found." % len(scheds)

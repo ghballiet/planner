@@ -1,0 +1,27 @@
+{% extends "master.html" %}
+
+{% block content %}
+    <h1>{{ PAGE_TITLE }}</h1>
+    {% for i in schedules.items %}
+        <h2>{{ i|first }}</h2>
+        <p>{{ i|last|length }} items found.</p>
+        {# <table class="normal_th"> #}
+        {#    <thead> #}
+        {#         <tr><th></th><th>Course</th><th>Section</th><th>Period</th></tr> #}
+        {#     </thead> #}
+        {# {% for v in i|last %} #}
+        {#     {% for o in v %} #}
+        {#         {% if forloop.first %} #}
+        {#             <tr class="first"><td>{{ forloop.parentloop.counter }}</td> #}
+        {#         {% else %} #}
+        {#             <tr><td></td> #}
+        {#         {% endif %} #}
+        {#         <td><a href="/offering/{{ o.id }}">{{ o.course }}</a></td> #}
+        {#         <td>{{ o.section }}</td> #}
+        {#         <td>{{ o.period }}</td> #}
+        {#         </tr> #}
+        {#     {% endfor %} #}
+        {# {% endfor %} #}
+        {# </table> #}
+    {% endfor %}
+{% endblock %}

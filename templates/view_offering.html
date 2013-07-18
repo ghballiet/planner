@@ -1,0 +1,12 @@
+{% extends "master.html" %}
+
+{% block content %}
+	<h1>{{ item }}</h1>
+	<table>
+		<tr><th>Course</th><td><ul class="items"><li><a href="/course/{{ item.course.id }}">{{ item.course }}</a></li></ul></td></tr>
+		<tr><th>Course Name</th><td>{{ item.course.name }}</td></tr>
+		<tr><th>Period</th><td><ul class="items"><li><a href="/period/{{ item.period.id }}">{{ item.period }}</a></li></ul></td></tr>
+		<tr><th>Section</th><td>{{ item.section }}</td></tr>
+		<tr><th>ASP</th><td><pre>{{ item.asp }}</pre></td></tr>
+	</table>	
+{% endblock %}

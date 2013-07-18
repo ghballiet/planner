@@ -1,0 +1,41 @@
+{% extends "master.html" %}
+
+{% block content %}
+	<h1>{{ item }}</h1>
+	<table>
+		<tr><th>Starts</th><td>{{ item.starts }}</td></tr>
+		<tr><th>Ends</th><td>{{ item.ends }}</td></tr>
+		<tr><th>Days</th><td>
+		{% if item.day.all %}
+			<ul class="items">
+			{% for d in item.day.all %}
+				<li><a href="/period_day/{{ d.id }}">{{ d }}</a></li>
+			{% endfor %}
+			</ul>
+		{% else %}
+		No days defined for this period.
+		{% endif %}
+		</td></tr>
+		<tr><th>Offerings</th><td>
+		{% if item.offering_set.all %}
+			<ul class="items">
+			{% for o in item.offering_set.all %}
+				<li><a href="/offering/{{ o.id }}">{{ o }}</a></li>
+			{% endfor %}
+			</ul>
+		{% else %}
+		No courses scheduled for this period.
+		{% endif %}
+		</td></tr>
+		<tr><th>Courses</th><td>
+		{% if item.offering_set.all %}
+		<ul class="items">
+		    {% for o in item.offering_set.all %}
+		      <li><a href="/course/{{ o.course.id }}">{{ o.course }}</a></li>
+		    {% endfor %}
+		</ul>
+		{% endif %}
+		</td></tr>
+		<tr><th>ASP</th><td><pre>{{ item.asp }}</pre></td></tr>
+	</table>
+{% endblock %}

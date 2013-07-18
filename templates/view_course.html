@@ -1,0 +1,71 @@
+{% extends "master.html" %}
+
+{% block content %}
+	<h1>{{ item }}</h1>
+	<table>
+		<tr><th>Department</th><td>
+		<ul class="items">
+			<li><a href="/department/{{ item.department.id }}">{{ item.department }}</a></li>
+		</ul>
+		</td></tr>
+		<tr><th>Number</th><td>{{ item.number }}</td></tr>
+		<tr><th>Name</th><td>{{ item.name }}</td></tr>
+		<tr><th>Hours</th><td>{{ item.hours }}</td></tr>
+		<tr><th>Meets</th><td>
+		{% if item.meets.all %}
+		<ul class="items">
+			{% for a in item.meets.all %}
+				<li><a href="/attribute/{{ a.id }}">{{ a }}</a></li>
+			{% endfor %}
+		</ul>
+		{% else %}
+			No attributes met.
+		{% endif %}
+		</td></tr>
+		<tr><th>Prerequisites</th><td>
+		{% if item.prerequisites.all %}
+		<ul class="items">
+			{% for p in item.prerequisites.all %}
+				<li><a href="/course/{{ p.id }}">{{ p }}</a></li>
+			{% endfor %}
+		</ul>
+		{% else %}
+			No prerequisites listed.
+		{% endif %}
+		</td></tr>
+		<tr><th>Prerequisite For</th><td>
+		  {% if item.preq.all %}
+	      <ul class="items">
+	       {% for p in item.preq.all %}
+	           <li><a href="/course/{{ p.id }}">{{ p }}</a></li>
+	       {% endfor %}
+	      </ul>
+	      {% else %}
+	        No courses list this course as a prerequisite.
+		  {% endif %}
+		</td></tr>
+		<tr><th>Corequisites</th><td>
+		{% if item.corequisites.all %}
+		<ul class="items">
+			{% for c in item.corequisites.all %}
+				<li><a href="/course/{{ c.id }}">{{ c }}</a></li>
+			{% endfor %}
+		</ul>
+		{% else %}
+			No corequisites listed.
+		{% endif %}
+		</td></tr>
+		<tr><th>Offerings</th><td>
+		{% if item.offering_set.all %}
+		    <ul class="items">
+		      {% for o in item.offering_set.all %}
+		          <li><a href="/offering/{{ o.id }}">{{ o }}</a></li>
+		      {% endfor %}
+		    </ul>
+		{% else %}
+		    No offerings listed for this course.
+	    {% endif %}
+		</td></tr>
+		<tr><th>ASP</th><td><pre>{{ item.asp }}</pre></td></tr>
+	</table>
+{% endblock %}

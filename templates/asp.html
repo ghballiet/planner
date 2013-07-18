@@ -1,0 +1,91 @@
+{% extends "master.html" %}
+
+{% block content %}
+	<h1>{{ PAGE_TITLE }}</h1>
+	<form id="hour_limits" method="get">
+	    <p><b>Min hours:</b> <input type="text" id="hmin" name="hmin" value="{{ hmin }}"></p>
+	    <p><b>Max hours:</b> <input type="text" id="hmax" name="hmax" value="{{ hmax }}"></p>	    
+	    <input type="submit" value="Update">
+    </form>
+	<form id="write_code" method="post" action="/write_asp/">
+    <input type="submit" value="Write to file" />	    
+	<textarea readonly class="code" id="code" name="code">% input file for ASP planner
+% generated {% now "r" %}
+
+% ========== 
+% = output = 
+% ========== 
+#hide.
+#show registered/5.
+
+% ===============
+% = constraints =
+% ===============
+#const hmin = {{ hmin }}.  % min hours
+#const hmax = {{ hmax }}. % max hours
+		
+% =============== 
+% = departments = 
+% =============== 
+{% for dept in depts %}dept(dept{{ dept.id }}).
+{% endfor %}
+% ============== 
+% = attributes = 
+% ============== 
+{% for a in attrs %}attr(attr{{ a.id }}).
+{% endfor %}
+% =========== 
+% = courses = 
+% =========== 
+{% for c in courses %}course(course{{ c.id }}).
+in_dept(course{{ c.id }}, dept{{ c.department.id }}).
+course_hours(course{{ c.id }}, {{ c.hours }}).{% for a in c.meets.all %}
+meets(course{{ c.id }}, attr{{ a.id }}).{% endfor %}{% for r in c.prerequisites.all %}
+preq(course{{ r.id }}, course{{ c.id }}).{% endfor %}{% for o in c.corequisites.all %}
+creq(course{{ c.id }}, course{{ o.id }}).{% endfor %}
+{% endfor %}
+% =========== 
+% = degrees = 
+% =========== 
+{% for d in degrees %}degree(degree{{ d.id }}).
+deg_in_dept(degree{{ d.id }}, dept{{ d.department.id }}).
+{% for c in d.required_courses.all %}deg_req(degree{{ d.id }}, course{{ c.id }}).
+{% endfor %}{% endfor %}
+% ============ 
+% = students = 
+% ============ 
+{% for s in students %}student(student{{ s.id }}).
+student_deg(student{{ s.id }}, degree{{ s.degree_plan.id }}).{% if s.selected %}
+selected(student{{ s.id }}).{% endif %}{% for c in s.taken.all %}
+taken(student{{ s.id }},course{{ c.id }}).{% endfor %}
+{% endfor %}
+% =========== 
+% = periods = 
+% =========== 
+{% for p in periods %}period(period{{ p.id }}).
+starts(period{{ p.id }}, {{ p.starts|time:"Gi" }}).
+ends(period{{ p.id }}, {{ p.ends|time:"Gi" }}).
+{% for d in p.day.all %}day(period{{ p.id }}, {{ d.day }}).
+{% endfor %}{% endfor %}
+% ============= 
+% = offerings = 
+% ============= 
+{% for o in offerings %}offering(offering{{ o.id }}).
+offer_course(offering{{ o.id }}, course{{ o.course.id }}).
+offer_section(offering{{ o.id }}, s{{ o.section }}).
+offer_pd(offering{{ o.id }}, period{{ o.period.id }}).
+{% endfor %}
+</textarea>
+<input type="submit" value="Write to file" />
+</form>
+<h2>Status</h2>
+<script type="text/javascript" src="http://prototypejs.org/assets/2009/8/31/prototype.js"></script>
+<script type="text/javascript">
+new Ajax.PeriodicalUpdater('status','/status', {
+   method: 'get',
+   frequency: .5,
+   decay: 0, 
+});
+</script>
+<textarea readonly class="code" id="status" name="status" onChange="document.getElementById('status').scrollTop=document.getElementById('status').scrollHeight;"></textarea>
+{% endblock %}

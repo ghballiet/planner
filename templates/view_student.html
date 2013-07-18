@@ -1,0 +1,25 @@
+{% extends "master.html" %}
+
+{% block content %}
+	<h1>{{ item }}</h1>
+	<table>
+		<tr><th>First name</th><td>{{ item.first_name }}</td></tr>
+		<tr><th>Last name</th><td>{{ item.last_name }}</td></tr>
+		<tr><th>Email</th><td><ul class="items"><li><a href="mailto:{{ item.first_name }} {{ item.last_name }}<{{ item.email }}>">{{ item.email }}</a></li></ul></td></tr>
+		<tr><th>Degree Plan</th><td><ul class="items"><li><a href="/degree/{{ item.degree_plan.id }}">{{ item.degree_plan }}</a></li></td></tr>
+		<tr><th>Courses Taken</th><td>
+		{% if item.taken.all %}
+		    <ul class="items">
+		    {% for c in item.taken.all %}
+		        <li><a href="/course/{{ c.id }}">{{ c }}</a></li>
+		    {% endfor %}
+		    </ul>
+		{% else %}
+		    No courses listed.
+		{% endif %}
+		</td></tr>
+		<tr><th>ASP</th><td><pre>{{ item.asp }}</pre></td></tr>
+	</table>
+	<a class="btn" href="/write_asp/{{ item.id }}/3/21">Calculate Schedules in ASP</a>
+	<a class="btn" href="/schedules/{{ item.id }}/1">View Schedules</a>
+{% endblock %}

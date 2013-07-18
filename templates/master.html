@@ -1,0 +1,17 @@
+<html>
+	<head>
+		<title>planner | {{ PAGE_TITLE }}</title>
+		<link rel="stylesheet" href="/media/master.css" type="text/css">
+	</head>
+	<body>
+		<div id="nav" class="wrapper">
+			{% include "nav.html" %}
+		</div>
+		<div id="content" class="wrapper">
+			{% block content %}{% endblock %}
+		</div>
+		<div id="footer" class="wrapper">
+			Copyright &copy; Glen R. Hunt. All Rights Reserved.
+		</div>
+	</body>
+</html>

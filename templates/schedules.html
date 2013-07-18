@@ -1,0 +1,33 @@
+{% extends "master.html" %}
+
+{% block content %}
+    <h1>{{ PAGE_TITLE }}</h1>
+    <h2><a href="/student/{{ student.id }}">{{ student }}</a></h2>
+    {% if scheds %}
+    <div id="pages">
+        {% for a in pages %}
+    <a href="/schedules/{{ s }}/{{ a }}">{{ a }}</a>
+        {% endfor %}
+    </div>
+    <p>{{ msg }} of <span id="num_schedules" name="num_schedules"></span>.</p>
+    <table class="normal_th">
+        <thead>
+            <tr><th>#</th><th>Hours</th><th>Offerings</th></tr>
+        </thead>
+        {% for s in scheds %}
+        <tr><th><a href="/calendar/{{ s.id }}">{{ forloop.counter|add:start|add:-1 }}</a></th><td>{{ s.hours }}</td></td>{% for o in s.offerings.all %}
+            <td><a href="/offering/{{ o.id }}">{{ o }}</a></td>{% endfor %}</tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No schedules defined.</p>
+    {% endif %}
+    <script type="text/javascript" src="http://prototypejs.org/assets/2009/8/31/prototype.js"></script>
+    <script type="text/javascript">
+    new Ajax.PeriodicalUpdater('num_schedules','/num_schedules', {
+       method: 'get',
+       frequency: 4,
+       decay: 0, 
+    });
+    </script>
+{% endblock %}

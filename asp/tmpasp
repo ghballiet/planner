@@ -1,0 +1,613 @@
+% ==========================================
+% BEGIN PROGRAM
+% ==========================================
+
+
+hours(C,H) :- 
+    course(C),
+    course_hours(C,H).
+    
+hours(O,H) :-
+    offering(O),
+    offer_course(O,C),
+    course_hours(C,H).
+
+attr_hrs_met(S,A,H) :-
+    H = [ taken(S,C) : meets(C,A) : hours(C,H2) = H2 ],
+    student(S), attr(A).
+
+attr_hrs_req(S,A,H) :-
+    H = [ student_deg(S,D) : deg_attr_req(D,A,H2) = H2 ],
+    student(S), attr(A), H > 0.
+
+attr_hrs_missing(S,A,H) :- 
+    attr_hrs_met(S,A,H2),
+    attr_hrs_req(S,A,H1),
+    student(S),
+    degree(D),
+    student_deg(S,D),
+    H1 > H2,
+    H = H1 - H2,
+    H > 0.
+
+course_meets_req(S,C) :-
+    student(S),
+    student_deg(S,D),
+    course(C),
+    deg_req(D,C),
+    not taken(S,C).
+
+course_meets_attrs(S,C) :- 
+    student(S),
+    course(C),
+    attr(A),
+    attr_hrs_missing(S,A,H),
+    meets(C,A).
+    
+missing_preq(S,C) :-
+    student(S),
+    course(C),
+    course(C1),
+    preq(C1,C),
+    not taken(S,C1).
+    
+missing_creq(S,C) :-
+    student(S),
+    course(C),
+    course(C1),
+    creq(C,C1),
+    register(S,O),
+    offer_course(O,C),
+    not register(S,O1),
+    offer_course(O1,C1).
+
+overlaps(M1,M2) :- 
+    period(M1),
+    period(M2),
+    day(M1,Y),
+    day(M2,Y),
+    M1 != M2.
+
+not_overlaps(M1,M2) :-
+    overlaps(M1,M2),
+    starts(M1,T1),
+    ends(M1,T2),
+    starts(M2,T3),
+    ends(M2,T4),
+    T1 > T4.
+
+not_overlaps(M1,M2) :-
+    overlaps(M1,M2),
+    starts(M1,T1),
+    ends(M1,T2),
+    starts(M2,T3),
+    ends(M2,T4),
+    T3 > T2.
+
+not_overlaps(M1,M2) :-
+    not overlaps(M1,M2),
+    period(M1),
+    period(M2),
+    M1 != M2.
+
+conflict(O1,O2) :-
+    offering(O1),
+    offering(O2),
+    O1 != O2,
+    offer_pd(O1,M1),
+    offer_pd(O2,M2),
+    not not_overlaps(M1,M2).
+
+conflict(O1,O2) :-
+    offering(O1),
+    offering(O2),
+    O1 != O2,
+    offer_course(O1,C),
+    offer_course(O2,C).
+    
+ineligible(S,O) :-
+    offering(O),
+    offer_course(O,C),
+    student(S),
+    missing_preq(S,C).
+    
+ineligible(S,O) :-
+    offering(O),
+    offer_course(O,C),
+    student(S),
+    taken(S,C).
+    
+ineligible(S,O) :-
+    offering(O),
+    student(S),
+    offer_course(O,C),
+    missing_creq(S,C).
+
+may_register(S,O) :- 
+    selected(S),
+    student(S),
+    offering(O),
+    offer_course(O,C),
+    course(C),
+    course_meets_req(S,C).
+
+may_register(S,O) :-
+    selected(S),
+    student(S),
+    offering(O),
+    offer_course(O,C),
+    course(C),
+    not course_meets_req(S,C),
+    course_meets_attrs(S,C).
+
+1 { register(S,O) : may_register(S,O) }.
+
+registered(S,O,C,E,M) :-
+    register(S,O),
+    student(S),
+    offering(O),
+    offer_course(O,C),
+    offer_section(O,E),
+    offer_pd(O,M).
+
+:- invalid.
+
+invalid :-
+    register(S,O1),
+    register(S,O2),
+    conflict(O1,O2).
+
+invalid :-
+    ineligible(S,O),
+    register(S,O).
+
+total_hours(H) :-
+    H = [ register(S,O) : may_register(S,O) : offer_course(O,C) : course_hours(C,H2) = H2 ].
+
+:- total_hours(H), H > hmax.
+:- total_hours(H), H < hmin.#hide.
+#show registered/5, total_hours/1.
+#const hmin = 3.  % min hours
+#const hmax = 21. % max hours
+
+
+dept(dept8).
+dept(dept5).
+dept(dept1).
+dept(dept7).
+dept(dept3).
+dept(dept2).
+dept(dept6).
+dept(dept4).
+attr(attr7).
+attr(attr3).
+attr(attr5).
+attr(attr1).
+attr(attr6).
+attr(attr8).
+attr(attr2).
+attr(attr4).
+course(course19).
+course_number(course19,1403).
+in_dept(course19, dept8).
+course_hours(course19, 4).
+meets(course19, attr6).
+course(course18).
+course_number(course18,1107).
+in_dept(course18, dept5).
+course_hours(course18, 1).
+meets(course18, attr6).
+creq(course18, course17).
+course(course17).
+course_number(course17,1307).
+in_dept(course17, dept5).
+course_hours(course17, 3).
+meets(course17, attr6).
+creq(course17, course18).
+course(course6).
+course_number(course6,1382).
+in_dept(course6, dept1).
+course_hours(course6, 3).
+preq(course1, course6).
+course(course1).
+course_number(course1,1411).
+in_dept(course1, dept1).
+course_hours(course1, 4).
+course(course5).
+course_number(course5,1412).
+in_dept(course5, dept1).
+course_hours(course5, 4).
+preq(course1, course5).
+course(course13).
+course_number(course13,2350).
+in_dept(course13, dept1).
+course_hours(course13, 3).
+preq(course12, course13).
+course(course9).
+course_number(course9,2413).
+in_dept(course9, dept1).
+course_hours(course9, 4).
+preq(course5, course9).
+course(course12).
+course_number(course12,2372).
+in_dept(course12, dept7).
+course_hours(course12, 3).
+preq(course3, course12).
+course(course2).
+course_number(course2,1301).
+in_dept(course2, dept3).
+course_hours(course2, 3).
+meets(course2, attr7).
+course(course8).
+course_number(course8,1302).
+in_dept(course8, dept3).
+course_hours(course8, 3).
+preq(course2, course8).
+course(course16).
+course_number(course16,2311).
+in_dept(course16, dept3).
+course_hours(course16, 3).
+meets(course16, attr7).
+course(course3).
+course_number(course3,1351).
+in_dept(course3, dept2).
+course_hours(course3, 3).
+course(course7).
+course_number(course7,1352).
+in_dept(course7, dept2).
+course_hours(course7, 3).
+preq(course3, course7).
+course(course11).
+course_number(course11,2350).
+in_dept(course11, dept2).
+course_hours(course11, 3).
+preq(course7, course11).
+course(course15).
+course_number(course15,2360).
+in_dept(course15, dept2).
+course_hours(course15, 3).
+preq(course11, course15).
+course(course10).
+course_number(course10,1408).
+in_dept(course10, dept6).
+course_hours(course10, 4).
+meets(course10, attr6).
+preq(course3, course10).
+course(course14).
+course_number(course14,2401).
+in_dept(course14, dept6).
+course_hours(course14, 4).
+meets(course14, attr6).
+preq(course10, course14).
+course(course4).
+course_number(course4,1301).
+in_dept(course4, dept4).
+course_hours(course4, 3).
+meets(course4, attr1).
+degree(degree1).
+deg_in_dept(degree1, dept1).
+deg_req(degree1, course6).
+deg_req(degree1, course1).
+deg_req(degree1, course5).
+deg_req(degree1, course13).
+deg_req(degree1, course9).
+deg_req(degree1, course12).
+deg_req(degree1, course2).
+deg_req(degree1, course8).
+deg_req(degree1, course16).
+deg_req(degree1, course3).
+deg_req(degree1, course7).
+deg_req(degree1, course11).
+deg_req(degree1, course15).
+deg_req(degree1, course10).
+deg_req(degree1, course14).
+deg_req(degree1, course4).
+deg_attr_req(degree1, attr1, 6).
+deg_attr_req(degree1, attr6, 6).
+deg_attr_req(degree1, attr8, 12).
+period(period1).
+starts(period1, 800).
+ends(period1, 850).
+day(period1, 1).
+day(period1, 3).
+day(period1, 5).
+period(period2).
+starts(period2, 800).
+ends(period2, 920).
+day(period2, 2).
+day(period2, 4).
+period(period3).
+starts(period3, 900).
+ends(period3, 950).
+day(period3, 1).
+day(period3, 3).
+day(period3, 5).
+period(period4).
+starts(period4, 930).
+ends(period4, 1050).
+day(period4, 2).
+day(period4, 4).
+period(period5).
+starts(period5, 1000).
+ends(period5, 1050).
+day(period5, 1).
+day(period5, 3).
+day(period5, 5).
+period(period6).
+starts(period6, 1100).
+ends(period6, 1150).
+day(period6, 1).
+day(period6, 3).
+day(period6, 5).
+period(period7).
+starts(period7, 1100).
+ends(period7, 1220).
+day(period7, 2).
+day(period7, 4).
+period(period8).
+starts(period8, 1200).
+ends(period8, 1250).
+day(period8, 1).
+day(period8, 3).
+day(period8, 5).
+period(period9).
+starts(period9, 1230).
+ends(period9, 1350).
+day(period9, 2).
+day(period9, 4).
+period(period10).
+starts(period10, 1300).
+ends(period10, 1350).
+day(period10, 1).
+day(period10, 3).
+day(period10, 5).
+period(period11).
+starts(period11, 1400).
+ends(period11, 1450).
+day(period11, 1).
+day(period11, 3).
+day(period11, 5).
+period(period12).
+starts(period12, 1400).
+ends(period12, 1520).
+day(period12, 2).
+day(period12, 4).
+period(period13).
+starts(period13, 1500).
+ends(period13, 1550).
+day(period13, 1).
+day(period13, 3).
+day(period13, 5).
+period(period14).
+starts(period14, 1530).
+ends(period14, 1650).
+day(period14, 2).
+day(period14, 4).
+period(period15).
+starts(period15, 1600).
+ends(period15, 1650).
+day(period15, 1).
+day(period15, 3).
+day(period15, 5).
+period(period16).
+starts(period16, 1700).
+ends(period16, 1750).
+day(period16, 1).
+day(period16, 3).
+day(period16, 5).
+period(period17).
+starts(period17, 1700).
+ends(period17, 1820).
+day(period17, 2).
+day(period17, 4).
+period(period18).
+starts(period18, 1800).
+ends(period18, 1850).
+day(period18, 1).
+day(period18, 3).
+day(period18, 5).
+period(period19).
+starts(period19, 1830).
+ends(period19, 1950).
+day(period19, 2).
+day(period19, 4).
+period(period20).
+starts(period20, 1900).
+ends(period20, 1950).
+day(period20, 1).
+day(period20, 3).
+day(period20, 5).
+period(period21).
+starts(period21, 2000).
+ends(period21, 2050).
+day(period21, 1).
+day(period21, 3).
+day(period21, 5).
+period(period22).
+starts(period22, 2000).
+ends(period22, 2120).
+day(period22, 2).
+day(period22, 4).
+period(period23).
+starts(period23, 2100).
+ends(period23, 2150).
+day(period23, 1).
+day(period23, 3).
+day(period23, 5).
+period(period24).
+starts(period24, 2130).
+ends(period24, 2250).
+day(period24, 2).
+day(period24, 4).
+period(period25).
+starts(period25, 2200).
+ends(period25, 2250).
+day(period25, 1).
+day(period25, 3).
+day(period25, 5).
+period(period26).
+starts(period26, 2300).
+ends(period26, 2350).
+day(period26, 1).
+day(period26, 3).
+day(period26, 5).
+offering(offering1).
+offer_course(offering1, course19).
+offer_section(offering1, s001).
+offer_pd(offering1, period26).
+offering(offering2).
+offer_course(offering2, course18).
+offer_section(offering2, s001).
+offer_pd(offering2, period19).
+offering(offering3).
+offer_course(offering3, course18).
+offer_section(offering3, s002).
+offer_pd(offering3, period9).
+offering(offering4).
+offer_course(offering4, course17).
+offer_section(offering4, s001).
+offer_pd(offering4, period24).
+offering(offering5).
+offer_course(offering5, course17).
+offer_section(offering5, s002).
+offer_pd(offering5, period1).
+offering(offering6).
+offer_course(offering6, course6).
+offer_section(offering6, s001).
+offer_pd(offering6, period12).
+offering(offering7).
+offer_course(offering7, course6).
+offer_section(offering7, s002).
+offer_pd(offering7, period26).
+offering(offering8).
+offer_course(offering8, course6).
+offer_section(offering8, s003).
+offer_pd(offering8, period7).
+offering(offering9).
+offer_course(offering9, course1).
+offer_section(offering9, s001).
+offer_pd(offering9, period10).
+offering(offering10).
+offer_course(offering10, course1).
+offer_section(offering10, s002).
+offer_pd(offering10, period18).
+offering(offering11).
+offer_course(offering11, course1).
+offer_section(offering11, s003).
+offer_pd(offering11, period20).
+offering(offering12).
+offer_course(offering12, course5).
+offer_section(offering12, s001).
+offer_pd(offering12, period8).
+offering(offering13).
+offer_course(offering13, course5).
+offer_section(offering13, s002).
+offer_pd(offering13, period14).
+offering(offering14).
+offer_course(offering14, course5).
+offer_section(offering14, s003).
+offer_pd(offering14, period17).
+offering(offering15).
+offer_course(offering15, course13).
+offer_section(offering15, s001).
+offer_pd(offering15, period2).
+offering(offering16).
+offer_course(offering16, course9).
+offer_section(offering16, s001).
+offer_pd(offering16, period8).
+offering(offering17).
+offer_course(offering17, course12).
+offer_section(offering17, s001).
+offer_pd(offering17, period10).
+offering(offering18).
+offer_course(offering18, course2).
+offer_section(offering18, s001).
+offer_pd(offering18, period6).
+offering(offering19).
+offer_course(offering19, course2).
+offer_section(offering19, s002).
+offer_pd(offering19, period23).
+offering(offering20).
+offer_course(offering20, course8).
+offer_section(offering20, s001).
+offer_pd(offering20, period22).
+offering(offering21).
+offer_course(offering21, course8).
+offer_section(offering21, s002).
+offer_pd(offering21, period18).
+offering(offering22).
+offer_course(offering22, course8).
+offer_section(offering22, s003).
+offer_pd(offering22, period17).
+offering(offering23).
+offer_course(offering23, course16).
+offer_section(offering23, s001).
+offer_pd(offering23, period13).
+offering(offering24).
+offer_course(offering24, course16).
+offer_section(offering24, s002).
+offer_pd(offering24, period5).
+offering(offering25).
+offer_course(offering25, course3).
+offer_section(offering25, s001).
+offer_pd(offering25, period18).
+offering(offering26).
+offer_course(offering26, course3).
+offer_section(offering26, s002).
+offer_pd(offering26, period24).
+offering(offering27).
+offer_course(offering27, course3).
+offer_section(offering27, s003).
+offer_pd(offering27, period23).
+offering(offering28).
+offer_course(offering28, course7).
+offer_section(offering28, s001).
+offer_pd(offering28, period3).
+offering(offering29).
+offer_course(offering29, course7).
+offer_section(offering29, s002).
+offer_pd(offering29, period25).
+offering(offering30).
+offer_course(offering30, course11).
+offer_section(offering30, s001).
+offer_pd(offering30, period12).
+offering(offering31).
+offer_course(offering31, course11).
+offer_section(offering31, s002).
+offer_pd(offering31, period25).
+offering(offering32).
+offer_course(offering32, course15).
+offer_section(offering32, s001).
+offer_pd(offering32, period7).
+offering(offering33).
+offer_course(offering33, course15).
+offer_section(offering33, s002).
+offer_pd(offering33, period14).
+offering(offering34).
+offer_course(offering34, course10).
+offer_section(offering34, s001).
+offer_pd(offering34, period11).
+offering(offering35).
+offer_course(offering35, course10).
+offer_section(offering35, s002).
+offer_pd(offering35, period5).
+offering(offering36).
+offer_course(offering36, course10).
+offer_section(offering36, s003).
+offer_pd(offering36, period26).
+offering(offering37).
+offer_course(offering37, course14).
+offer_section(offering37, s001).
+offer_pd(offering37, period25).
+offering(offering38).
+offer_course(offering38, course4).
+offer_section(offering38, s001).
+offer_pd(offering38, period17).
+student(student2).
+selected(student2).
+student_deg(student2, degree1).
+taken(student2, course1).
+taken(student2, course3).
+taken(student2, course7).
+taken(student2, course11).
+taken(student2, course4).

@@ -1,0 +1,14 @@
+{% extends "master.html" %}
+
+{% block content %}
+    <script type="text/javascript" src="http://prototypejs.org/assets/2009/8/31/prototype.js"></script>
+    <script type="text/javascript">
+    new Ajax.PeriodicalUpdater('status','/status', {
+       method: 'get',
+       frequency: .5,
+       decay: 0, 
+    });
+    </script>
+    <h1>Current Status</h1>
+    <pre id="status"></pre>
+{% endblock %}

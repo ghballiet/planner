@@ -1,0 +1,248 @@
+body {
+	font-family: Helvetica,Arial,sans-serif;
+	font-size: 12px;
+	color: #555;
+}
+
+h1,h2,h3,h4 {
+    color: #444;
+    font-weight: lighter;
+    border-bottom: solid 1px #e4e4e4;
+    padding-bottom: .5em;
+}
+
+h1 {
+    font-family: "Futura";
+/*    letter-spacing: normal;*/
+    text-transform: uppercase;
+    color: #222;
+}
+
+a {
+	color: #bbb;
+	text-decoration: none;
+	outline: none;
+}
+
+a:hover {
+	color: #900;
+	background-color: #f0f0f0;
+}
+
+a:focus {
+    color: #900;
+	background-color: #f0f0f0;    
+}
+
+.wrapper {
+	width: 70em;
+	margin: 0px auto;
+}
+
+#nav {
+	margin-top: 2em;
+	text-align: right;
+	margin-bottom: 1em;
+	display: none;
+}
+
+#nav ul {
+	margin: 0px;
+	padding: 0px;
+}
+
+#nav ul li {
+	list-style: none;
+	margin: 0px;
+	padding: 0px;
+	display: inline-block;
+}
+
+#nav ul li a {
+	display: inline-block;
+	padding: .25em 1em;
+	border-right: solid 1px #ccc;
+	color: #bbb;
+}
+
+#nav ul li a:hover {
+	color: #900;
+	border-bottom: none;
+	background-color: #fff;
+}
+
+#nav ul li:last-child a {
+	border-right: none;
+}
+
+#footer {
+	margin-top: 2em;
+	margin-bottom: 2em;
+	text-align: center;
+	font-weight: 400;
+	font-size: .9em;
+}
+
+form {
+	margin: 0px;
+	padding: 1em;
+	margin-bottom: 1em;
+	border: solid 1px #bbb;
+	-webkit-border-radius: .5em;
+	-webkit-box-shadow: 0px 2px 3px rgba(0,0,0,.4);
+	background-color: #f7f7f7;
+}
+
+form input {
+	padding: .5em;
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	outline: none;
+}
+
+table {
+	width: 100%;
+	margin: 0px;
+	padding: 0px;
+	font-size: inherit;
+	border-collapse: collapse;
+}
+
+table th {
+	width: 10em;
+	text-align: left;
+	vertical-align: top;
+}
+
+table.normal_th th {
+    width: auto !important;
+}
+
+table.normal_th th:first-child, table.normal_th tr td:first-child {
+    width: 4em !important;
+}
+
+table.normal_th tr.first td {
+    border-top: solid 1px #ccc;
+}
+
+table td, table th {
+	padding: .5em;
+	vertical-align: top;
+}
+
+ul.items {
+	margin: 0px;
+	padding: 0px;
+}
+
+ul.items li {
+	list-style: none;
+	margin: 0px;
+}
+
+ul.items li a {
+	display: block;
+	padding: .5em;
+}
+
+table td ul.items li a {
+	margin-left: -.5em;
+	margin-right: -.5em;
+}
+
+table td ul.items li:first-child a {
+	margin-top: -.5em;
+}
+
+table td ul.items li:last-child a {
+	margin-bottom: -.5em;
+}
+
+textarea.code {
+	width: 100%;
+	height: 50em;
+	padding: 1em;
+	line-height: 1.5em;
+	font-family: "Espresso Mono";
+	outline: none;
+	border: solid 1px #999;
+	-webkit-box-shadow: 0px 2px 3px rgba(0,0,0,.2);
+	margin-bottom: 1em;
+}
+
+textarea.code:focus {
+	border: solid 1px #900;
+}
+
+a.btn {
+    display: inline-block;
+    color: #fff;
+    padding: .5em;
+    margin: .5em;
+    background-image: -webkit-gradient(linear,left top,left bottom,from(#c00),to(#900));
+    text-shadow: 0px 1px 2px rgba(0,0,0,.4);
+    -webkit-border-radius: .25em;
+    font-weight: bold;
+    -webkit-box-shadow: 0px 3px 4px rgba(0,0,0,.4);
+}
+
+#pages {
+}
+
+#pages a {
+    display: inline-block;
+    padding: .5em 0px;
+    width: 2em;
+    vertical-align: middle;
+    text-align: center;
+    -webkit-border-radius: .25em;
+    color: #fff;
+    background-image: -webkit-gradient(linear,left top,left bottom,from(#222),to(#555));
+    text-shadow: 0px 1px 2px rgba(0,0,0,.4);
+    -webkit-box-shadow: inset 0px 2px rgba(0,0,0,.4);
+    margin-bottom:.5em;
+}
+
+table.calendar td, table.calendar th {
+    border: solid 1px #ddd;
+}
+
+table.calendar tbody tr td {
+    text-align: center;
+}
+
+table.calendar tbody tr th {
+    text-align: right;
+    border-left: none;
+    background: #ccc;
+    color: #222;
+}
+
+table.calendar thead tr th:first-child {
+    border: none;
+    background: transparent;
+}
+
+table.calendar thead tr th {
+    border-top: none;
+    text-align: center;
+    background: #222;
+    color: #fff;
+}
+
+table.calendar td a {
+    color: #fff;
+    background: #900;
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+    -webkit-border-radius: .25em;
+    text-shadow: 0px 1px 2px rgba(0,0,0,.4);
+    -webkit-box-shadow: 0px 2px 3px rgba(0,0,0,.4);
+    background-image: -webkit-gradient(linear,left top,left bottom,from(#c00),to(#900));
+    border: solid 1px #900;
+}
+
+table.normal_th a {
+    color: #222;
+}

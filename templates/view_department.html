@@ -1,0 +1,32 @@
+{% extends "master.html" %}
+
+{% block content %}
+	<h1>{{ item }}</h1>
+	<table>
+		<tr><th>Name</th><td>{{ item.name }}</td></tr>
+		<tr><th>Abbreviation</th><td>{{ item.abbreviation }}</td></tr>
+		<tr><th>Courses</th><td>
+		{% if item.course_set.all %}
+			<ul class="items">
+			{% for c in item.course_set.all %}
+				<li><a href="/course/{{ c.id }}">{{ c }}</a></li>
+			{% endfor %}
+			</ul>
+		{% else %}
+			No courses listed for this department.
+		{% endif %}
+		</td></tr>
+		<tr><th>Degrees</th><td>
+		{% if item.degree_set.all %}
+			<ul class="items">
+			{% for d in item.degree_set.all %}
+				<li><a href="/degree/{{ d.id }}">{{ d }}</a></li>
+			{% endfor %}
+			</ul>
+		{% else %}
+		No degrees listed for this department.
+		{% endif %}
+		</td></tr>
+		<tr><th>ASP</th><td><pre>{{ item.asp }}</pre></td></tr>
+	</table>
+{% endblock %}

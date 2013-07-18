@@ -1,0 +1,45 @@
+{% extends "master.html" %}
+
+{% block content %}
+	<h1>{{ item }}</h1>
+	<table>
+		<tr><th>Description</th><td>{{ item.description }}</td></tr>
+		<tr><th>Department</th><td><ul class="items">
+			<li><a href="/department/{{ item.department.id }}">{{ item.department }}</a></li>
+		</ul></td></tr>
+		<tr><th>Required Courses</th><td>
+		{% if item.required_courses.all %}
+			<ul class="items">
+			{% for c in item.required_courses.all %}
+				<li><a href="/course/{{ c.id }}">{{ c }}</a></li>
+			{% endfor %}
+			</ul>
+		{% else %}
+		No courses listed.
+		{% endif %}
+		</td></tr>
+		<tr><th>Attributes</th><td>
+		{% if item.required_attrs.all %}
+		  <ul class="items">
+		    {% for a in item.required_attrs.all %}
+		    <li><a href="#">{{ a }}</a></li>
+		    {% endfor %}
+		  </ul>
+		{% else %}
+		No attribute requirements listed.
+		{% endif %}
+		</td></tr>
+		<tr><th>Students</th><td>
+		{% if item.student_set.all %}
+			<ul class="items">
+			{% for s in item.student_set.all %}
+				<li><a href="/student/{{ s.id }}">{{ s }}</a></li>
+			{% endfor %}
+			</ul>
+		{% else %}
+		No students listed.
+		{% endif %}
+		</td></tr>
+		<tr><th>ASP</th><td><pre>{{ item.asp }}</pre></td></tr>
+	</table>
+{% endblock %}

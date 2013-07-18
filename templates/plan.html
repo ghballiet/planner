@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+    <head>
+        <title>Plan</title>
+        <link rel="stylesheet" href="http://glenrhunt.com/reset" type="text/css">
+        <link rel="stylesheet" href="/media/master2.css" type="text/css">
+    </head>
+    <body>
+        <div id="wrapper">
+            <h1>Plan Your Schedule.</h1>
+            <form method="post">
+                <h2>Select a student.</h2>
+                {% if students %}
+                <select id="student" name="student">
+                {% for s in students %}
+                    <option value="{{ s.id }}">{{ s }}</option>
+                {% endfor %}
+                </select>
+                {% endif %}
+                <h2>Select hour constraints.</h2>
+                <table class="form">
+                    <thead><tr><th>Min</th><th>Max</th></tr></thead>
+                    <tbody><tr><td><input type="text" class="len3" maxlength="3" name="hmin" id="hmin" value="3"></td>
+                        <td><input type="text" class="len3" maxlength="3" name="hmax" id="hmax" value="21"></td></tr></tbody>
+                </table>
+                <input type="submit" value="Calculate Schedules">
+            </form>
+        </div>
+    </body>
+</html>

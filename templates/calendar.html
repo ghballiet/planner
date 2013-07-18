@@ -1,0 +1,29 @@
+{% extends "master.html" %}
+
+{% block content %}
+    <h1>{{ PAGE_TITLE }}</h1>
+    <h3>Viewing schedule {{ sched.id }} for {{ sched.student.first_name}} {{ sched.student.last_name }} with {{ sched.hours }} total hours.</h3>
+    <table class="calendar normal_th">
+        <thead>
+            <th></th>
+            {% for d in days %}
+                <th>{{ d }}</th>
+            {% endfor %}
+        </thead>
+        <tbody>
+            {% for h in hours %}
+            <tr><th>{{ h }}</th>
+            {% for d in days %}
+            <td>
+            {% for o in sched.offerings.all %}
+            {% if d in o.period.day.all and o.period.starts|time:"G:i" <= h and o.period.ends|time:"G:i" > h %}
+            <a href="/offering/{{ o.id }}">{{ o }}</a>
+            {% endif %}
+            {% endfor %}
+            </td>
+            {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
